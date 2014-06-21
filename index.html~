@@ -187,7 +187,7 @@ hljs.initHighlightingOnLoad();
 
 <h2>Model Selection</h2>
 
-<p>Since response variable can take one of the five values <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, <strong>D</strong>, <strong>E</strong> and hence it&#39;s a <strong>classification</strong> problem. I have selected random forest to build my model for predicting the manner people used for their excercise. Random forest can be used as a first case model when underlying model is not obvious and when you have severe time pressure as <a href="http://www.kaggle.com/wiki/RandomForests">written on kaggel&#39;s site</a>. Random forest can deal with higher order interactions, correlated predictor variables.</p>
+<p>Since response variable can take one of the five values <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, <strong>D</strong>, <strong>E</strong> and hence it&#39;s a <em><strong>classification</strong></em> problem. I have selected random forest to build my model for predicting the manner people used for their excercise. Random forest can be used as a first case model when underlying model is not obvious and when you have severe time pressure as <a href="http://www.kaggle.com/wiki/RandomForests">written on kaggel&#39;s site</a>. Random forest can deal with higher order interactions, correlated predictor variables.</p>
 
 <h2>Data Slicing</h2>
 
@@ -233,7 +233,7 @@ length(nzv) # No of predictors having near zero variance
 
 <h3><em>2. Columns with high NA frequency</em></h3>
 
-<p><strong>Weight lifting excercise dataset</strong> contains many predictors whose approximately 97 % values are NA. Hence most of the cases these predictors are not playing any part in decision of respnose variable(variable classe here). I&#39;ve removed all those predictors whose relative frequency of NA values are more than 95%. R function <strong>NAfrequencyFeature</strong> written below takes two arguments first one X(a data frame or matrix) and second one cutoff(a vector of length one) and returns index of columns(predictors) having having relative frequencies of NA more than cutoff.</p>
+<p><strong>Weight lifting excercise dataset</strong> contains many predictors whose approximately 97 % values are NA. Hence most of the cases these predictors are not playing any part in decision of respnose variable(variable classe here). I&#39;ve removed all those variables whose relative frequency of NA values are more than 95%. R function <strong>NAfrequencyFeature</strong> written below takes two arguments first one X(a data frame or matrix) and second one cutoff(a vector of length one) and returns index of columns(predictors) having having relative frequencies of NA more than cutoff.</p>
 
 <pre><code class="r">NAfrequencyFeature &lt;- function(X, cutoff = .95){ # cutoff is used to decide what NA frequency is critical 
         nRow &lt;- nrow(X); nCol &lt;- ncol(X)
@@ -279,7 +279,7 @@ dim(trainingFilt);dim(testingFilt)
 
 <h3><em>3. Irrelevant predictors based on subject of problem</em></h3>
 
-<p>As suggested by one of our classmates in the <strong>discussion forum</strong> of <strong>practical machine learning</strong>  course, the response variable(classe) is seems to affected by sensor related predictors and not by his name and date etc. So I&#39;ve removed first six predictors for feature selection. </p>
+<p>As suggested by one of our classmates in the <strong>discussion forum</strong> of <strong>practical machine learning</strong>  course, the response variable(classe) is seems to affected by sensor related predictors and not by his name and data etc. So I&#39;ve removed first six predictors for feature selection.</p>
 
 <pre><code class="r">print(colnames(trainingFilt[,1:6]))
 </code></pre>
@@ -315,7 +315,7 @@ dim(trainingFilt)
 
 <p>Random forest object is created by calling the following R command.</p>
 
-<pre><code class="r">#modFit &lt;- train(classe~., data = trainingFilt, method = &quot;rf&quot;,importance = T)
+<pre><code class="r">modFit &lt;- train(classe~., data = trainingFilt, method = &quot;rf&quot;,importance = T)
 modFit$finalModel
 </code></pre>
 
@@ -336,7 +336,7 @@ modFit$finalModel
 ## E    0    0    5    6 2514    0.004356
 </code></pre>
 
-<h2>Expected out of sample error</h2>
+<h2>Expected Out of sample error</h2>
 
 <pre><code class="r">pred &lt;- predict(modFit, newdata = testingFilt)
 confusionMatrix(testing$classe, pred)
@@ -375,14 +375,21 @@ confusionMatrix(testing$classe, pred)
 ## Balanced Accuracy       0.999    0.998    0.998    0.998    0.999
 </code></pre>
 
-<p>As said above their is no need to carry out seperate cross validation for random forest. One third part of training data is not used in building kth tree and it is used as test set. Above result says<br/>
+<p>As said above their is no need to carry out seperate cross validation for random forest. One third part of training data is not used in building kth tree. Above result said says<br/>
 <strong>OOB(Out of bag)</strong> estimate of  error rate: 0.74%<br/>
 <strong>Accuracy</strong> : 0.998</p>
 
-<h5>By this model I got 100% in 20 test cases</h5>
+<h2>Prediction on 20 test cases</h2>
+
+<pre><code class="r">resultPred &lt;- predict(modFit, newdata = TestData)
+resultPred # predicted values of 20 test cases
+</code></pre>
+
+<pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
+</code></pre>
 
 </body>
 
 </html>
-
 
