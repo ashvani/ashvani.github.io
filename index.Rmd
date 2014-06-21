@@ -1,0 +1,118 @@
+# Machine Learning project for HAR(human activity recognition)
+
+## Introduction
+  This project is part of course **Practical Machine Learning** offered by **Johns Hopkins University** on **Coursera**. Having data on personal acitivity of people (here weight lifting excercise) it is possible to predict the manner they used for excercise. To know about  dataset and  variables [visit the site] (http://groupware.les.inf.puc-rio.br/har) and look for paragraph **Weight Lifting Exercises Dataset**.
+
+## Model Selection
+   Since response variable can take one of the five values **A**, **B**, **C**, **D**, **E** and hence it's a **classification** problem. I have selected random forest to build my model for predicting the manner people used for their excercise. Random forest can be used as a first case model when underlying model is not obvious and when you have severe time pressure as [written on kaggel's site](http://www.kaggle.com/wiki/RandomForests). Random forest can deal with higher order interactions, correlated predictor variables.
+
+## Data Slicing
+   I've divided training data into two parts, first one is training set and second one is test set to compute out of sample error for built model. To compute confusion matrix, value of response variable must be known and hence 20 test cases can't be used as test set.
+   
+```{r}
+library(caret)
+set.seed(432) # TrainData is training data provided .
+TestData <- read.table("~/all_graphs/pmlTesting.csv", sep = ",", header = T)
+inTrain <- createDataPartition(TrainData$classe, list = F, p = .7)# 70% of data goes to training set
+training <- TrainData[inTrain,] 
+testing <- TrainData[-inTrain,];dim(training);dim(testing)
+dim(TestData) # object TestData contains 20 test cases
+
+```
+
+## Feature Extraction
+   Three points are used to select features to train the final model.
+   
+### _1. Near Zero Variance_
+
+In some situations our dataset contains predictors which have one or two unique values with very high probability(near zero variance predictor), and these predictors may cause instability in model. These predictors can be identified using inbuilt R function **nearZeroVar** in caret package. Function **nearZeroVar** takes input as data(a numeric vector or matrix, or data frame) and returns index of columns of predictors for specified freqCut option(default value is used here). More details for this function and its uses can be found [here] (http://caret.r-forge.r-project.org/preprocess.html).
+
+
+```{r}
+nzv <- nearZeroVar(training) # function nearZeroVar in caret returns index of column having near zero variance 
+trainingFilt <- training[,-nzv]
+testingFilt <- testing[,-nzv]
+TestData <- TestData[,-nzv] # 2o test cases
+length(nzv) # No of predictors having near zero variance
+
+```
+
+### _2. Columns with high NA frequency_
+
+**Weight lifting excercise dataset** contains many predictors whose approximately 97 % values are NA. Hence most of the cases these predictors are not playing any part in decision of respnose variable(variable classe here). I've removed all those predictors whose relative frequency of NA values are more than 95%. R function **NAfrequencyFeature** written below takes two arguments first one X(a data frame or matrix) and second one cutoff(a vector of length one) and returns index of columns(predictors) having having relative frequencies of NA more than cutoff.
+
+
+```{r}
+NAfrequencyFeature <- function(X, cutoff = .95){ # cutoff is used to decide what NA frequency is critical 
+        nRow <- nrow(X); nCol <- ncol(X)
+        columnIndex <- numeric(nCol)
+        NAFrequency <- numeric(nCol)
+        j <- 1
+        for(i in 1:nCol){
+                Sum <- sum(is.na(X[,i]))# total numbers of NA's in i'th column
+                frequency <- Sum/nRow  
+                if(frequency >= cutoff){
+                        columnIndex[j] <- i #column index of predictor having relative frequency greater than cutoff is assigned to vector columnIndex
+                        NAFrequency <- frequency;j <- j+1
+                }
+        }
+        Result <- data.frame(columnIndex, NAFrequency)
+        Result <- Result[Result[,1] > 0,]
+        Result # Returns a data frame whose first column is index of column and second
+        # is relative frequency of NA's
+}
+x <- NAfrequencyFeature(trainingFilt, cutoff = .95)
+x[1:5,] # first five rows of data frame
+trainingFilt <- trainingFilt[,-x[,1]] # first column of x has index of high NA frequency predictors
+testingFilt <- testingFilt[,-x[,1]]
+TestData <- TestData[,-x[,1]]
+dim(trainingFilt);dim(testingFilt)
+```
+
+### _3. Irrelevant predictors based on subject of problem_
+
+As suggested by one of our classmates in the **discussion forum** of **practical machine learning**  course, the response variable(classe) is seems to affected by sensor related predictors and not by his name and date etc. So I've removed first six predictors for feature selection. 
+
+```{r}
+print(colnames(trainingFilt[,1:6]))
+trainingFilt <- trainingFilt[,-(1:6)]
+testingFilt <- testingFilt[,-(1:6)]
+TestData <- TestData[,-(1:6)]
+dim(trainingFilt)
+```
+
+## Cross-Validation
+
+According to **Leo Breiman** and **Adele Cutler**There is no need to carry out cross - validation seperately as they [say here](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr) : 
+> In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error. It is estimated internally, during the run, as follows:
+
+> Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.
+
+> Put each case left out in the construction of the kth tree down the kth tree to get a classification. In this way, a test set classification is obtained for each case in about one-third of the trees. At the end of the run, take j to be the class that got most of the votes every time case n was oob. The proportion of times that j is not equal to the true class of n averaged over all cases is the oob error estimate. This has proven to be unbiased in many tests. 
+
+That's why I used default settings of caret package for random forest for cross-validation in building my model.
+
+## Training the final model
+
+Random forest object is created by calling the following R command.
+
+```{r}
+modFit <- train(classe~., data = trainingFilt, method = "rf",importance = T)
+modFit$finalModel
+```
+
+
+## Expected out of sample error
+
+```{r}
+pred <- predict(modFit, newdata = testingFilt)
+confusionMatrix(testing$classe, pred)
+
+```
+
+As said above their is no need to carry out seperate cross validation for random forest. One third part of training data is not used in building kth tree and it is used as test set. Above result says  
+**OOB(Out of bag)** estimate of  error rate: 0.74%    
+**Accuracy** : 0.998
+
+##### By this model I got 100% in 20 test cases
+
