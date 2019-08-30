@@ -19,35 +19,35 @@ tt, code, pre {
    font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
 }
 
-h1 { 
-   font-size:2.2em; 
+h1 {
+   font-size:2.2em;
 }
 
-h2 { 
-   font-size:1.8em; 
+h2 {
+   font-size:1.8em;
 }
 
-h3 { 
-   font-size:1.4em; 
+h3 {
+   font-size:1.4em;
 }
 
-h4 { 
-   font-size:1.0em; 
+h4 {
+   font-size:1.0em;
 }
 
-h5 { 
-   font-size:0.9em; 
+h5 {
+   font-size:0.9em;
 }
 
-h6 { 
-   font-size:0.8em; 
+h6 {
+   font-size:0.8em;
 }
 
 a:visited {
    color: rgb(50%, 0%, 50%);
 }
 
-pre {	
+pre {
    margin-top: 0;
    max-width: 95%;
    border: 1px solid #ccc;
@@ -82,54 +82,54 @@ hr {
 }
 
 @media print {
-   * { 
-      background: transparent !important; 
-      color: black !important; 
-      filter:none !important; 
-      -ms-filter: none !important; 
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
    }
 
-   body { 
-      font-size:12pt; 
-      max-width:100%; 
-   }
-       
-   a, a:visited { 
-      text-decoration: underline; 
+   body {
+      font-size:12pt;
+      max-width:100%;
    }
 
-   hr { 
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
       visibility: hidden;
       page-break-before: always;
    }
 
-   pre, blockquote { 
-      padding-right: 1em; 
-      page-break-inside: avoid; 
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
    }
 
-   tr, img { 
-      page-break-inside: avoid; 
+   tr, img {
+      page-break-inside: avoid;
    }
 
-   img { 
-      max-width: 100% !important; 
+   img {
+      max-width: 100% !important;
    }
 
-   @page :left { 
-      margin: 15mm 20mm 15mm 10mm; 
-   }
-     
-   @page :right { 
-      margin: 15mm 10mm 15mm 20mm; 
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
    }
 
-   p, h2, h3 { 
-      orphans: 3; widows: 3; 
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
    }
 
-   h2, h3 { 
-      page-break-after: avoid; 
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
    }
 }
 
@@ -187,17 +187,17 @@ hljs.initHighlightingOnLoad();
 
 <h2>Model Selection</h2>
 
-<p>Since response variable can take one of the five values <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, <strong>D</strong>, <strong>E</strong> and hence it&#39;s a <strong>classification</strong> problem. I have selected random forest to build my model for predicting the manner people used for their excercise. Random forest can be used as a first case model when underlying model is not obvious and when you have severe time pressure as <a href="http://www.kaggle.com/wiki/RandomForests">written on kaggel&#39;s site</a>. Random forest can deal with higher order interactions, correlated predictor variables.</p>
+<p>Since response variable can take one of the five values <strong>A</strong>, <strong>B</strong>, <strong>C</strong>, <strong>D</strong>, <strong>E</strong> and hence it&#39;s a <strong>classification</strong> problem. I have selected random forest to build my model for predicting the manner people used for their excercise. Random forest can be used as a first case model when underlying model is not obvious and when you have severe time pressure. Random forest can deal with higher order interactions and correlated predictor variables.</p>
 
 <h2>Data Slicing</h2>
 
-<p>I&#39;ve divided training data into two parts, first one is training set and second one is test set to compute out of sample error for built model. To compute confusion matrix, value of response variable must be known and hence 20 test cases can&#39;t be used as test set.</p>
+<p>I&#39;ve divided training data into two parts, the first one being training set and the second one is test set to compute out of sample error for the fitted model. To compute confusion matrix, value of response variable must be known and hence 20 test cases can&#39;t be used as a test set.</p>
 
 <pre><code class="r">library(caret)
 set.seed(432) # TrainData is training data provided .
 TestData &lt;- read.table(&quot;~/all_graphs/pmlTesting.csv&quot;, sep = &quot;,&quot;, header = T)
 inTrain &lt;- createDataPartition(TrainData$classe, list = F, p = .7)# 70% of data goes to training set
-training &lt;- TrainData[inTrain,] 
+training &lt;- TrainData[inTrain,]
 testing &lt;- TrainData[-inTrain,];dim(training);dim(testing)
 </code></pre>
 
@@ -219,9 +219,9 @@ testing &lt;- TrainData[-inTrain,];dim(training);dim(testing)
 
 <h3><em>1. Near Zero Variance</em></h3>
 
-<p>In some situations our dataset contains predictors which have one or two unique values with very high probability(near zero variance predictor), and these predictors may cause instability in model. These predictors can be identified using inbuilt R function <strong>nearZeroVar</strong> in caret package. Function <strong>nearZeroVar</strong> takes input as data(a numeric vector or matrix, or data frame) and returns index of columns of predictors for specified freqCut option(default value is used here). More details for this function and its uses can be found <a href="http://caret.r-forge.r-project.org/preprocess.html">here</a>.</p>
+<p>In some situations our dataset contains predictors which have one or two unique values with very high probability(near zero variance predictor), and these predictors may cause instability in model. These predictors can be identified using inbuilt R function <strong>nearZeroVar</strong> in caret package. Function <strong>nearZeroVar</strong> takes input as data(a numeric vector or matrix, or data frame) and returns index of columns of predictors for specified freqCut option(default value is used here). More details for this function and its uses can be found <a href="https://topepo.github.io/caret/pre-processing.html#zero--and-near-zero-variance-predictors">here</a>.</p>
 
-<pre><code class="r">nzv &lt;- nearZeroVar(training) # function nearZeroVar in caret returns index of column having near zero variance 
+<pre><code class="r">nzv &lt;- nearZeroVar(training) # function nearZeroVar in caret returns index of column having near zero variance
 trainingFilt &lt;- training[,-nzv]
 testingFilt &lt;- testing[,-nzv]
 TestData &lt;- TestData[,-nzv] # 2o test cases
@@ -235,14 +235,14 @@ length(nzv) # No of predictors having near zero variance
 
 <p><strong>Weight lifting excercise dataset</strong> contains many predictors whose approximately 97 % values are NA. Hence most of the cases these predictors are not playing any part in decision of respnose variable(variable classe here). I&#39;ve removed all those predictors whose relative frequency of NA values are more than 95%. R function <strong>NAfrequencyFeature</strong> written below takes two arguments first one X(a data frame or matrix) and second one cutoff(a vector of length one) and returns index of columns(predictors) having having relative frequencies of NA more than cutoff.</p>
 
-<pre><code class="r">NAfrequencyFeature &lt;- function(X, cutoff = .95){ # cutoff is used to decide what NA frequency is critical 
+<pre><code class="r">NAfrequencyFeature &lt;- function(X, cutoff = .95){ # cutoff is used to decide what NA frequency is critical
         nRow &lt;- nrow(X); nCol &lt;- ncol(X)
         columnIndex &lt;- numeric(nCol)
         NAFrequency &lt;- numeric(nCol)
         j &lt;- 1
         for(i in 1:nCol){
                 Sum &lt;- sum(is.na(X[,i]))# total numbers of NA&#39;s in i&#39;th column
-                frequency &lt;- Sum/nRow  
+                frequency &lt;- Sum/nRow
                 if(frequency &gt;= cutoff){
                         columnIndex[j] &lt;- i #column index of predictor having relative frequency greater than cutoff is assigned to vector columnIndex
                         NAFrequency &lt;- frequency;j &lt;- j+1
@@ -279,7 +279,7 @@ dim(trainingFilt);dim(testingFilt)
 
 <h3><em>3. Irrelevant predictors based on subject of problem</em></h3>
 
-<p>As suggested by one of our classmates in the <strong>discussion forum</strong> of <strong>practical machine learning</strong>  course, the response variable(classe) is seems to affected by sensor related predictors and not by his name and date etc. So I&#39;ve removed first six predictors for feature selection. </p>
+<p>The response variable(classe) seems to be affected by sensor related predictors and not by person&#39;s name and date/timestamp etc. So I&#39;ve removed first six predictors for feature selection. </p>
 
 <pre><code class="r">print(colnames(trainingFilt[,1:6]))
 </code></pre>
@@ -319,13 +319,13 @@ dim(trainingFilt)
 modFit$finalModel
 </code></pre>
 
-<pre><code>## 
+<pre><code>##
 ## Call:
-##  randomForest(x = x, y = y, mtry = param$mtry, importance = ..1) 
+##  randomForest(x = x, y = y, mtry = param$mtry, importance = ..1)
 ##                Type of random forest: classification
 ##                      Number of trees: 500
 ## No. of variables tried at each split: 27
-## 
+##
 ##         OOB estimate of  error rate: 0.74%
 ## Confusion matrix:
 ##      A    B    C    D    E class.error
@@ -343,7 +343,7 @@ confusionMatrix(testing$classe, pred)
 </code></pre>
 
 <pre><code>## Confusion Matrix and Statistics
-## 
+##
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1672    1    0    1    0
@@ -351,19 +351,19 @@ confusionMatrix(testing$classe, pred)
 ##          C    0    2 1022    2    0
 ##          D    0    0    2  960    2
 ##          E    0    0    1    1 1080
-## 
+##
 ## Overall Statistics
-##                                         
-##                Accuracy : 0.998         
+##
+##                Accuracy : 0.998
 ##                  95% CI : (0.996, 0.999)
-##     No Information Rate : 0.284         
-##     P-Value [Acc &gt; NIR] : &lt;2e-16        
-##                                         
-##                   Kappa : 0.997         
-##  Mcnemar&#39;s Test P-Value : NA            
-## 
+##     No Information Rate : 0.284
+##     P-Value [Acc &gt; NIR] : &lt;2e-16
+##
+##                   Kappa : 0.997
+##  Mcnemar&#39;s Test P-Value : NA
+##
 ## Statistics by Class:
-## 
+##
 ##                      Class: A Class: B Class: C Class: D Class: E
 ## Sensitivity             0.999    0.997    0.997    0.996    0.998
 ## Specificity             1.000    1.000    0.999    0.999    1.000
@@ -384,5 +384,3 @@ confusionMatrix(testing$classe, pred)
 </body>
 
 </html>
-
-
